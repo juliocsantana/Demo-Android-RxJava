@@ -52,7 +52,6 @@ public class ProductPresenterImpl  implements ProductPresenter {
     @Override
     public void clear() {
         adapter.clear();
-        onDestroy();
     }
 
     @Override

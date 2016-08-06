@@ -53,7 +53,6 @@ public class StorePresenterImpl implements StorePresenter {
     @Override
     public void clear() {
         adapter.clear();
-        onDestroy();
     }
 
     @Override
