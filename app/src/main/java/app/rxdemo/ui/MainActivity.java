@@ -1,6 +1,7 @@
 package app.rxdemo.ui;
 
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -19,10 +20,16 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.pager)
     ViewPager viewPager;
     private DemoPagerAdapter myPagerAdapter;
+    public static String POSITION = "POSITION";
+    private int position = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null)
+            position = savedInstanceState.getInt(POSITION);
+
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
@@ -32,9 +39,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("Stores"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        myPagerAdapter = new DemoPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(myPagerAdapter);
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        setupViewPager(viewPager);
 
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -49,8 +54,27 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
+                viewPager.setCurrentItem(position);
             }
         });
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+        myPagerAdapter = new DemoPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(myPagerAdapter);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(POSITION, tabLayout.getSelectedTabPosition());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null)
+            position = savedInstanceState.getInt(POSITION);
     }
 }
