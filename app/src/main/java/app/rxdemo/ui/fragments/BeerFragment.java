@@ -1,6 +1,7 @@
 package app.rxdemo.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,28 +57,36 @@ public class BeerFragment extends Fragment implements BeerView {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         presenter = new BeerPresenterImpl(this);
-        presenter.fetch(sortData);
 
         return view;
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(STATE_SORTDATA, sortData);
-        super.onSaveInstanceState(savedInstanceState);
-    }
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        presenter.clear();
+        if(savedInstanceState != null)
+            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+
         presenter.fetch(sortData);
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        presenter.clear();
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_SORTDATA, sortData);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null)
+            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
         presenter.fetch(sortData);
     }
 

@@ -1,6 +1,7 @@
 package app.rxdemo.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,9 +57,18 @@ public class ProductFragment extends Fragment implements ProductView {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         presenter = new ProductPresenterImpl(this);
-        presenter.fetch(sortData);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if(savedInstanceState != null)
+            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+
+        presenter.fetch(sortData);
     }
 
     @Override
@@ -68,16 +78,12 @@ public class ProductFragment extends Fragment implements ProductView {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        presenter.clear();
-        presenter.fetch(sortData);
-    }
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        presenter.clear();
+        if(savedInstanceState != null)
+            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+
         presenter.fetch(sortData);
     }
 
