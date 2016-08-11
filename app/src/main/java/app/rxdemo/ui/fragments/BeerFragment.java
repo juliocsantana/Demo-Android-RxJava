@@ -33,7 +33,7 @@ public class BeerFragment extends Fragment implements BeerView {
     private BeerPresenter presenter;
     private String msj = null;
     private boolean sortData = false;
-    public static final String STATE_SORTDATA = "beersSorted";
+    public static final String STATE_SORT = "beersSorted";
 
     public BeerFragment() {
         // Required empty public constructor
@@ -46,17 +46,10 @@ public class BeerFragment extends Fragment implements BeerView {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
-        else
-            sortData = false;
 
         view = inflater.inflate(R.layout.fragment_beer, container, false);
         setHasOptionsMenu(true);
-        ButterKnife.bind(this, view);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        presenter = new BeerPresenterImpl(this);
+        setRetainInstance(true);
 
         return view;
     }
@@ -66,28 +59,37 @@ public class BeerFragment extends Fragment implements BeerView {
         super.onViewCreated(view, savedInstanceState);
 
         if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+            sortData = savedInstanceState.getBoolean(STATE_SORT);
 
+        ButterKnife.bind(this, view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        presenter = new BeerPresenterImpl(this);
         presenter.fetch(sortData);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_SORTDATA, sortData);
+        outState.putBoolean(STATE_SORT, sortData);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+            sortData = savedInstanceState.getBoolean(STATE_SORT);
     }
 
     @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        presenter.fetch(sortData);
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override

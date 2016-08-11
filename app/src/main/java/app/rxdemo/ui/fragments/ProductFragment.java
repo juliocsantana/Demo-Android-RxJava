@@ -31,8 +31,8 @@ public class ProductFragment extends Fragment implements ProductView {
     private View view;
     private ProductPresenter presenter;
     private String msj = null;
-    private boolean sortData;
-    static final String STATE_SORTDATA = "productsSorted";
+    private boolean sortData = false;
+    public static final String STATE_SORT = "productsSorted";
 
     public ProductFragment() {
         // Required empty public constructor
@@ -46,17 +46,9 @@ public class ProductFragment extends Fragment implements ProductView {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
-        else
-            sortData = false;
-
         view = inflater.inflate(R.layout.fragment_beer, container, false);
         setHasOptionsMenu(true);
-        ButterKnife.bind(this, view);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        presenter = new ProductPresenterImpl(this);
+        setRetainInstance(true);
 
         return view;
     }
@@ -66,25 +58,37 @@ public class ProductFragment extends Fragment implements ProductView {
         super.onViewCreated(view, savedInstanceState);
 
         if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+            sortData = savedInstanceState.getBoolean(STATE_SORT);
 
+        ButterKnife.bind(this, view);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        presenter = new ProductPresenterImpl(this);
         presenter.fetch(sortData);
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(STATE_SORTDATA, sortData);
-        super.onSaveInstanceState(savedInstanceState);
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_SORT, sortData);
     }
 
     @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORTDATA);
+            sortData = savedInstanceState.getBoolean(STATE_SORT);
+    }
 
-        presenter.fetch(sortData);
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     @Override
