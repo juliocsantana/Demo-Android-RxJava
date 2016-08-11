@@ -69,12 +69,11 @@ public class ProductPresenterImpl  implements ProductPresenter {
     }
 
     private Observable<List<Product>> getAllProducts() {
-        return service.getProducts().cache();
+        return service.getProducts();
     }
 
     private Observable<List<Product>> getAllSortedProducts() {
         return service.getProducts()
-                .cache()
                 .flatMap(new Func1<List<Product>, Observable<Product>>() {
                     @Override
                     public Observable<Product> call(List<Product> products) {

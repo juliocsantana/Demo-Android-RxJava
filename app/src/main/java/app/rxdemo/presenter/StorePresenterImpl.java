@@ -70,12 +70,11 @@ public class StorePresenterImpl implements StorePresenter {
     }
 
     private Observable<List<Store>> getAllStores() {
-        return service.getStores().cache();
+        return service.getStores();
     }
 
     private Observable<List<Store>> getAllSortedStores() {
         return service.getStores()
-                .cache()
                 .flatMap(new Func1<List<Store>, Observable<Store>>() {
                     @Override
                     public Observable<Store> call(List<Store> stores) {

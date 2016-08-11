@@ -53,7 +53,6 @@ public class BeerPresenterImpl implements BeerPresenter {
     @Override
     public void clear() {
         adapter.clear();
-        onDestroy();
     }
 
     @Override
@@ -71,12 +70,11 @@ public class BeerPresenterImpl implements BeerPresenter {
     }
 
     private Observable<List<Beer>> getAllBeers() {
-        return service.getBeers().cache();
+        return service.getBeers();
     }
 
     private Observable<List<Beer>> getAllSortedBeers() {
         return service.getBeers()
-                .cache()
                 .flatMap(new Func1<List<Beer>, Observable<Beer>>() {
                     @Override
                     public Observable<Beer> call(List<Beer> beers) {
