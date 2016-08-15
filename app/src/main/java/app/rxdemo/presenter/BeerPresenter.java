@@ -8,9 +8,10 @@ import app.rxdemo.ui.fragments.BeerView;
  */
 public interface BeerPresenter {
     void clear();
-    void onDestroy();
+    void unsubscribe();
     void bind();
-    void fetch(boolean sort);
+    void fetch();
+    void fetchSort();
     BeerView geView();
     BeerAdapter getAdapter();
 }

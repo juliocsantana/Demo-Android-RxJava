@@ -8,9 +8,10 @@ import app.rxdemo.ui.fragments.StoreView;
  */
 public interface StorePresenter {
     void clear();
-    void onDestroy();
+    void unsubscribe();
     void bind();
-    void fetch(boolean sort);
+    void fetch();
+    void fetchSort();
     StoreView geView();
     StoreAdapter getAdapter();
 }
