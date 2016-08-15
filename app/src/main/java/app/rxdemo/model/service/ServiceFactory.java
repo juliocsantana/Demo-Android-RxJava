@@ -9,9 +9,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ServiceFactory {
 
-    public final static <T> T createRetrofitService(Class<T> clazz, String endPoint) {
+    public final static <T> T createRetrofitService(Class<T> clazz) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(endPoint)
+                .baseUrl(OntarioService.SERVICE_ENDPOINT)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
