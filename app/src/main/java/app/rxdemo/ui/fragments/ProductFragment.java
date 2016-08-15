@@ -64,7 +64,7 @@ public class ProductFragment extends Fragment implements ProductView {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         presenter = new ProductPresenterImpl(this);
-        presenter.fetch(sortData);
+        presenter.fetch();
     }
 
     @Override
@@ -74,27 +74,11 @@ public class ProductFragment extends Fragment implements ProductView {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORT);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onDestroy() {
-        presenter.onDestroy();
-        presenter = null;
+        if(presenter != null) {
+            presenter.unsubscribe();
+            presenter = null;
+        }
         super.onDestroy();
     }
 
@@ -144,8 +128,9 @@ public class ProductFragment extends Fragment implements ProductView {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_sort) {
             sortData = true;
+            presenter.unsubscribe();
             presenter.clear();
-            presenter.fetch(sortData);
+            presenter.fetchSort();
         }
 
         return super.onOptionsItemSelected(item);

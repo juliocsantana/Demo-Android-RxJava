@@ -24,7 +24,6 @@ public class StorePresenterImpl implements StorePresenter {
     private StoreAdapter adapter = null;
     private OntarioService service = null;
     private Subscription subscription = null;
-    private Observable<List<Store>> observable = null;
 
     public StorePresenterImpl(StoreView view) {
         this.view = view;
@@ -37,7 +36,7 @@ public class StorePresenterImpl implements StorePresenter {
         view.showProgressBar();
         adapter = new StoreAdapter(new ArrayList<Store>());
         view.getRecyclerView().setAdapter(adapter);
-        service = ServiceFactory.createRetrofitService(OntarioService.class, OntarioService.SERVICE_ENDPOINT);
+        service = ServiceFactory.createRetrofitService(OntarioService.class);
     }
 
     @Override
@@ -56,25 +55,28 @@ public class StorePresenterImpl implements StorePresenter {
     }
 
     @Override
-    public void fetch(boolean sort) {
-        //Setup observable
-        if(sort)
-            observable = getAllSortedStores();
-        else
-            observable = getAllStores();
+    public void fetch() {
         //Setup subscription
-        subscription = observable
+        subscription = getAllStores()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new StoreSubscriber(this));
+    }
+
+    @Override
+    public void fetchSort() {
+        getAllSortedStores()
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new StoreSubscriber(this));
     }
 
     private Observable<List<Store>> getAllStores() {
-        return service.getStores();
+        return service.getStores().cache();
     }
 
     private Observable<List<Store>> getAllSortedStores() {
-        return service.getStores()
+        return getAllStores()
                 .flatMap(new Func1<List<Store>, Observable<Store>>() {
                     @Override
                     public Observable<Store> call(List<Store> stores) {
@@ -85,7 +87,7 @@ public class StorePresenterImpl implements StorePresenter {
     }
 
     @Override
-    public void onDestroy() {
+    public void unsubscribe() {
         if (subscription != null && !subscription.isUnsubscribed())
             subscription.unsubscribe();
     }

@@ -23,7 +23,6 @@ public class ProductPresenterImpl  implements ProductPresenter {
     private ProductAdapter adapter = null;
     private OntarioService service = null;
     private Subscription subscription = null;
-    private Observable<List<Product>> observable = null;
 
     public ProductPresenterImpl(ProductView view) {
         this.view = view;
@@ -36,7 +35,7 @@ public class ProductPresenterImpl  implements ProductPresenter {
         view.showProgressBar();
         adapter = new ProductAdapter(new ArrayList<Product>());
         view.getRecyclerView().setAdapter(adapter);
-        service = ServiceFactory.createRetrofitService(OntarioService.class, OntarioService.SERVICE_ENDPOINT);
+        service = ServiceFactory.createRetrofitService(OntarioService.class);
     }
 
     @Override
@@ -55,25 +54,28 @@ public class ProductPresenterImpl  implements ProductPresenter {
     }
 
     @Override
-    public void fetch(boolean sort) {
-        //Setup observable
-        if(sort)
-            observable = getAllSortedProducts();
-        else
-            observable = getAllProducts();
+    public void fetch() {
         //Setup subscription
-        subscription = observable
+        subscription = getAllProducts()
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new ProductSubscriber(this));
     }
 
+    @Override
+    public void fetchSort() {
+        getAllSortedProducts()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new ProductSubscriber(this));
+    }
+
     private Observable<List<Product>> getAllProducts() {
-        return service.getProducts();
+        return service.getProducts().cache();
     }
 
     private Observable<List<Product>> getAllSortedProducts() {
-        return service.getProducts()
+        return getAllProducts()
                 .flatMap(new Func1<List<Product>, Observable<Product>>() {
                     @Override
                     public Observable<Product> call(List<Product> products) {
@@ -84,7 +86,7 @@ public class ProductPresenterImpl  implements ProductPresenter {
     }
 
     @Override
-    public void onDestroy() {
+    public void unsubscribe() {
         if (subscription != null && !subscription.isUnsubscribed())
             subscription.unsubscribe();
     }

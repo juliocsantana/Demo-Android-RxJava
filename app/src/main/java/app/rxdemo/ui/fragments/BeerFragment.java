@@ -65,7 +65,7 @@ public class BeerFragment extends Fragment implements BeerView {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         presenter = new BeerPresenterImpl(this);
-        presenter.fetch(sortData);
+        presenter.fetch();
     }
 
     @Override
@@ -75,27 +75,11 @@ public class BeerFragment extends Fragment implements BeerView {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORT);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
     public void onDestroy() {
-        presenter.onDestroy();
-        presenter = null;
+        if(presenter != null) {
+            presenter.unsubscribe();
+            presenter = null;
+        }
         super.onDestroy();
     }
 
@@ -145,8 +129,9 @@ public class BeerFragment extends Fragment implements BeerView {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_sort) {
             sortData = true;
+            presenter.unsubscribe();
             presenter.clear();
-            presenter.fetch(sortData);
+            presenter.fetchSort();
         }
 
         return super.onOptionsItemSelected(item);

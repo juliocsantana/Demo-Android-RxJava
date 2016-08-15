@@ -24,7 +24,6 @@ public class BeerPresenterImpl implements BeerPresenter {
     private BeerAdapter adapter = null;
     private OntarioService service = null;
     private Subscription subscription = null;
-    private Observable<List<Beer>> observable = null;
 
     public BeerPresenterImpl(BeerView view) {
         this.view = view;
@@ -37,7 +36,7 @@ public class BeerPresenterImpl implements BeerPresenter {
         view.showProgressBar();
         adapter = new BeerAdapter(new ArrayList<Beer>());
         view.getRecyclerView().setAdapter(adapter);
-        service = ServiceFactory.createRetrofitService(OntarioService.class, OntarioService.SERVICE_ENDPOINT);
+        service = ServiceFactory.createRetrofitService(OntarioService.class);
     }
 
     @Override
@@ -56,25 +55,28 @@ public class BeerPresenterImpl implements BeerPresenter {
     }
 
     @Override
-    public void fetch(boolean sort) {
-        //Setup observable
-        if(sort)
-            observable = getAllSortedBeers();
-        else
-            observable = getAllBeers();
+    public void fetch() {
         //Setup subscription
-        subscription = observable
+        subscription = getAllBeers()
                         .subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new BeerSubscriber(this));
     }
 
+    @Override
+    public void fetchSort() {
+        getAllSortedBeers()
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new BeerSubscriber(this));
+    }
+
     private Observable<List<Beer>> getAllBeers() {
-        return service.getBeers();
+        return service.getBeers().cache();
     }
 
     private Observable<List<Beer>> getAllSortedBeers() {
-        return service.getBeers()
+        return getAllBeers()
                 .flatMap(new Func1<List<Beer>, Observable<Beer>>() {
                     @Override
                     public Observable<Beer> call(List<Beer> beers) {
@@ -85,7 +87,7 @@ public class BeerPresenterImpl implements BeerPresenter {
     }
 
     @Override
-    public void onDestroy() {
+    public void unsubscribe() {
         if (subscription != null && !subscription.isUnsubscribed())
             subscription.unsubscribe();
     }

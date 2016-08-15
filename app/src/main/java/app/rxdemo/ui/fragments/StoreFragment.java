@@ -32,9 +32,7 @@ public class StoreFragment extends Fragment implements StoreView {
     private StorePresenter presenter;
     private String msj = null;
     private boolean sortData = false;
-    private boolean reloadData = true;
     public static final String STATE_SORT = "storesSorted";
-    public static final String STATE_RELOAD = "storesReload";
 
     public StoreFragment() {
         // Required empty public constructor
@@ -66,36 +64,21 @@ public class StoreFragment extends Fragment implements StoreView {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         presenter = new StorePresenterImpl(this);
-        presenter.fetch(sortData);
+        presenter.fetch();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_SORT, sortData);    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if(savedInstanceState != null)
-            sortData = savedInstanceState.getBoolean(STATE_SORT);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
+        outState.putBoolean(STATE_SORT, sortData);
     }
 
     @Override
     public void onDestroy() {
-        presenter.onDestroy();
-        presenter = null;
+        if(presenter != null) {
+            presenter.unsubscribe();
+            presenter = null;
+        }
         super.onDestroy();
     }
 
@@ -139,8 +122,9 @@ public class StoreFragment extends Fragment implements StoreView {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_sort) {
             sortData = true;
+            presenter.unsubscribe();
             presenter.clear();
-            presenter.fetch(sortData);
+            presenter.fetchSort();
         }
 
         return super.onOptionsItemSelected(item);
